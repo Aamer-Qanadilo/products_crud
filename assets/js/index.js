@@ -234,12 +234,6 @@ function updateItem(){
 function deleteAll(){
     var size = products.length;
     
-    if(size == 0){
-        deleteAllBtn.setAttribute("disabled","true");
-        return;
-    }
-    else deleteAllBtn.removeAttribute("disabled");
-
     Swal.fire({
         title: 'Are you sure you want to delete them all?',
         text: "You won't be able to revert this!",
@@ -253,6 +247,7 @@ function deleteAll(){
             for(let i = size-1 ; i >= 0 ; i--){
                 deleteProduct(i, true);
             }
+            checkAvailableProducts();
             Swal.fire(
                 'Deleted!',
                 'All products has been deleted.',
@@ -260,6 +255,7 @@ function deleteAll(){
             )
         }
     })
+
 
     // We can do another way which is 
     // localStorage.removeItem("products");
