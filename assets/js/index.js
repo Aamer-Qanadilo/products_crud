@@ -15,13 +15,15 @@ deleteAllBtn.onclick = deleteAll;
 addBtn.onclick = function(){
     checkAllInputs();
 
-    if(inputsError.length != 0) return;
+    if(inputsError.length !== 0) return;
 
-    if(!updateFlag) addProduct();
-    else           updateItem();
-    displayProducts();
-    clearForm();
-    checkAvailableProducts();
+    if(!updateFlag){
+        addProduct();
+        displayProducts();
+        clearForm();
+        checkAvailableProducts();
+    }
+    else updateItem();
 }
 
 // custom variables
@@ -37,7 +39,8 @@ var inputsRegex = [
 var inputsErrorMessage = [
                     "Name should start with a capital letter & with a length of 3-25",
                     "Range of Quantity should be between 1-1000",
-                    "Range of Price should be between 0-5000"
+                    "Range of Price should be between 0-5000",
+                    "Maximum description length is 100 letter"
                 ];
 var inputsError = [];
 var products;
@@ -121,6 +124,7 @@ function fillForm(index){
     inputProductDescription.value = product.description;
 
     addBtn.innerHTML = "Update Product";
+    checkAllInputs();
     updateFlag = true;
     updateIndex = index;
 }
@@ -128,15 +132,17 @@ function fillForm(index){
 function displayProducts(){
     var holder="";
     for(let i = 0 ; i < products.length ; i++){
-        holder += ` <tr>
+        holder += `
+        <tr>
             <td>${i}</td>
             <td>${products[i].name}</td>
             <td>${products[i].quantity}</td>
             <td>${products[i].price}</td>
             <td>${products[i].description}</td>
             <td><button type="button" onclick="deleteProduct(${i})" class="btn btn-danger">Delete</button></td>
-            <td><button type="button" onclick="fillForm(${i})" class="btn btn-secondary">Update</button></td>
-        </tr>`
+            <td><button type="button" onclick="fillForm(${i})" class="btn btn-secondary">Update</button></td>  
+        </tr>
+        `
     }
     productsTable.innerHTML = holder;
 }
@@ -200,6 +206,7 @@ function deleteProduct(index, approved=false){
 function updateItem(){
     if(updateIndex >= 0 && updateIndex < products.length){
         
+
         Swal.fire({
             title: 'Are you sure?',
             text: "You won't be able to revert this!",
@@ -219,6 +226,10 @@ function updateItem(){
                 products.splice(updateIndex,1,product);
                 updateLocalStorage(); 
                 
+                displayProducts();
+                checkAvailableProducts();
+                clearForm();
+
                 Swal.fire({
                     icon: 'success',
                     title: 'Updated successfully!',
@@ -283,6 +294,6 @@ function searchProduct(name){
 }
 
 function checkAvailableProducts(){
-    if(products.length == 0) deleteAllBtn.setAttribute("disabled","true");
+    if(products.length === 0) deleteAllBtn.setAttribute("disabled","true");
     else                     deleteAllBtn.removeAttribute("disabled");
 }
