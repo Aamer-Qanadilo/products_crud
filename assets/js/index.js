@@ -8,9 +8,15 @@ var inputProductDescription = document.getElementById('inputProductDescription1'
 // buttons
 var addBtn = document.getElementById('addBtn');
 var clearBtn = document.getElementById('clearBtn');
+var deleteAllBtn = document.getElementById('deleteAllBtn');
 
 clearBtn.onclick = clearForm;
+deleteAllBtn.onclick = deleteAll;
 addBtn.onclick = function(){
+    checkAllInputs();
+
+    if(inputsError.length != 0) return;
+
     if(!updateFlag) addProduct();
     else           updateItem();
     displayProducts();
@@ -19,8 +25,20 @@ addBtn.onclick = function(){
 
 // custom variables
 
-var productInputs = document.getElementsByClassName('productInputs')
+var productInputs = document.querySelectorAll('.productInputs')
 var productsTable = document.getElementById('products');
+var inputsRegex = [
+                   /^[A-Z][A-Za-z]{2,24}$/ 
+                 , /^([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|1000)$/ 
+                 , /^([0-9]|[0-9][0-9]|[0-9][0-9][0-9]|[0-4][0-9][0-9][0-9]|5000)$/
+                 , /^[A-Za-z]{0,100}$/
+                ];
+var inputsErrorMessage = [
+                    "Name should start with a capital letter & with a length of 3-25",
+                    "Range of Quantity should be between 1-1000",
+                    "Range of Price should be between 0-5000"
+                ];
+var inputsError = [];
 var products;
 var updateIndex = 0;
 var updateFlag = false;
@@ -32,14 +50,65 @@ window.onload = function(){
     } else {
         products = [];
     }
+    checkAvailableProducts();
+}
+
+productInputs.forEach((input,index) => {
+    input.addEventListener("keyup", function(){
+        checkInput(input,index)
+    });
+});
+
+function checkInput(input,index){
+    if(!inputsRegex[index].exec(productInputs[index].value)){
+        productInputs[index].classList.remove("is-valid");
+        productInputs[index].classList.add("is-invalid");
+            
+        //These next lines is used to add a paragraph with the error message
+        if(input.parentElement.childElementCount < 3){
+            const para = document.createElement(`p`);
+            const node = document.createTextNode(inputsErrorMessage[index]);
+
+            para.appendChild(node);
+            para.classList.add("alert","alert-danger");
+            input.parentElement.appendChild(para);
+        }
+    } else {
+        productInputs[index].classList.remove("is-invalid");
+        productInputs[index].classList.add("is-valid");
+        if(input.parentElement.childElementCount == 3){
+            //This next lines is used to remove the paragraph with the error message        
+            input.parentElement.removeChild(input.parentElement.children[2]);
+        }
+    }
+    checkAllInputs();
+}
+
+function checkAllInputs(){
+    for(let i = 0 ; i < productInputs.length ; i++) {
+        if(!inputsRegex[i].exec(productInputs[i].value)){
+            addBtn.setAttribute("disabled","true");
+            inputsError.push(inputsErrorMessage[i]);
+            return;
+        }
+    }
+    inputsError = [];
+    addBtn.removeAttribute("disabled");
 }
 
 function clearForm(){
     for(let i = 0 ; i < productInputs.length ; i++) {
         productInputs[i].value = "";
+        productInputs[i].classList.remove("is-valid");
+        productInputs[i].classList.remove("is-invalid");
+        if(productInputs[i].parentElement.childElementCount == 3){
+            //This next lines is used to remove the paragraph with the error message        
+            productInputs[i].parentElement.removeChild(productInputs[i].parentElement.children[2]);
+        }
     }
     addBtn.innerHTML = "Add Product";
     updateFlag = false;
+    addBtn.setAttribute("disabled","true");
 }
 
 function fillForm(index){
@@ -104,7 +173,7 @@ function deleteProduct(index, approved=false){
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
+                confirmButtonText: 'Delete!'
               }).then((result) => {
                 if (result.isConfirmed) {
                     products.splice(index,1);
@@ -136,7 +205,7 @@ function updateItem(){
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, update it!'
+            confirmButtonText: 'Update'
           }).then((result) => {
             if (result.isConfirmed) {
                 var product = {
@@ -162,6 +231,13 @@ function updateItem(){
 
 function deleteAll(){
     var size = products.length;
+    
+    if(size == 0){
+        deleteAllBtn.setAttribute("disabled","true");
+        return;
+    }
+    else deleteAllBtn.removeAttribute("disabled");
+
     Swal.fire({
         title: 'Are you sure you want to delete them all?',
         text: "You won't be able to revert this!",
@@ -208,3 +284,7 @@ function searchProduct(name){
     productsTable.innerHTML = holder;
 }
 
+function checkAvailableProducts(){
+    if(products.length == 0) deleteAllBtn.setAttribute("disabled","true");
+    else                     deleteAllBtn.removeAttribute("disabled");
+}
