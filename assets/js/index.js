@@ -29,7 +29,7 @@ addBtn.onclick = function(){
 var productInputs = document.querySelectorAll('.productInputs')
 var productsTable = document.getElementById('products');
 var inputsRegex = [
-                   /^[A-Z][A-Za-z ]{2,24}$/ 
+                   /^[A-Z][A-Za-z 0-9]{2,24}$/ 
                  , /^([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|1000)$/ 
                  , /^([0-9]|[0-9][0-9]|[0-9][0-9][0-9]|[0-4][0-9][0-9][0-9]|5000)$/
                  , /^[A-Za-z ]{0,100}$/
