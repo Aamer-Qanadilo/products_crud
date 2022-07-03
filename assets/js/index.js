@@ -58,8 +58,12 @@ window.onload = function(){
 }
 
 productInputs.forEach((input,index) => {
+    console.log(input, input.value);
     input.addEventListener("keyup", function(){
         checkInput(input,index)
+    });
+    input.addEventListener("click", function(){
+        console.log(input.value);
     });
 });
 
